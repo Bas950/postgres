@@ -2499,9 +2499,10 @@ t('concurrent cursors multiple connections', async() => {
   return ['12233445566778', xs.sort().join('')]
 })
 
-t('Insert array into custom domain array', async() => {
+t('Insert array into custom domain array', async () => {
+  let sql = postgres({ ...options, fetch_types: true })
   await sql`create domain my_custom_array_type as text[]`
   await sql`create table test (x my_custom_array_type)`
-  const sql = postgres({ ...options, fetch_types: true })
+  sql = postgres({ ...options, fetch_types: true })
   await sql`insert into test (x) values (${sql({ x: [['a']] })})`
 })
