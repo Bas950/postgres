@@ -761,6 +761,7 @@ function Connection(options, queues = {}, { onopen = noop, onend = noop, onclose
 
   function addArrayType(oid, typarray, baseoid, basetyparray ) {
     if (!!options.parsers[typarray] && !!options.serializers[typarray]) return
+    if (baseoid) console.log('adding array type', oid, typarray, baseoid, basetyparray)
     const parser = options.parsers[baseoid || oid]
     options.shared.typeArrayMap[oid] = typarray
     options.parsers[typarray] = (xs) => arrayParser(xs, parser, basetyparray || typarray)
