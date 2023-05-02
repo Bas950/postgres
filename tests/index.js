@@ -2499,8 +2499,8 @@ t('concurrent cursors multiple connections', async() => {
   return ['12233445566778', xs.sort().join('')]
 })
 
-t("Insert array into custom domain array", async () => {
-	await sql`create domain my_custom_array_type as text[]`;
-	await sql`create table test (x my_custom_array_type)`;
-	await sql`insert into test ${sql({ x: [["a"]] })}`;
+t('Insert array into custom domain array', async() => {
+  await sql`create domain my_custom_array_type as text[]`
+  await sql`create table test (x my_custom_array_type)`
+  await sql`insert into test ${sql({ x: [['a']] })}`
 })
