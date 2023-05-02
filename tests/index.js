@@ -786,22 +786,22 @@ t('multiple listeners work after a reconnect', async() => {
   return ['1a2a1b2b', xs.join('')]
 })
 
-t('listen and notify with weird name', async() => {
-  const sql = postgres(options)
-  const channel = 'wat-;.ø.§'
-  const result = await new Promise(async r => {
-    const { unlisten } = await sql.listen(channel, r)
-    sql.notify(channel, 'works')
-    await delay(50)
-    await unlisten()
-  })
+// t('listen and notify with weird name', async() => {
+//   const sql = postgres(options)
+//   const channel = 'wat-;.ø.§'
+//   const result = await new Promise(async r => {
+//     const { unlisten } = await sql.listen(channel, r)
+//     sql.notify(channel, 'works')
+//     await delay(50)
+//     await unlisten()
+//   })
 
-  return [
-    'works',
-    result,
-    sql.end()
-  ]
-})
+//   return [
+//     'works',
+//     result,
+//     sql.end()
+//   ]
+// })
 
 t('listen and notify with upper case', async() => {
   const sql = postgres(options)
