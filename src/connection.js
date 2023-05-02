@@ -724,24 +724,55 @@ function Connection(options, queues = {}, { onopen = noop, onend = noop, onclose
 
   async function fetchArrayTypes() {
     needsTypes = false
-    const types = await new Query([`
-      select b.oid, b.typarray
-      from pg_catalog.pg_type a
-      left join pg_catalog.pg_type b on b.oid = a.typelem
-      where a.typcategory = 'A'
-      group by b.oid, b.typarray
-      order by b.oid
-    `], [], execute)
-    types.forEach(({ oid, typarray }) => addArrayType(oid, typarray))
+    const types = await new Query(
+			[
+				`
+        SELECT
+          DISTINCT ON
+          (b.oid) b.oid, 
+          b.typarray,
+          CASE
+            WHEN b.typbasetype > 0
+              THEN c.oid
+            ELSE NULL
+          END AS baseoid,
+          CASE
+            WHEN b.typbasetype > 0
+              THEN c.typarray
+            ELSE NULL
+          END AS basetyparray
+        FROM
+          pg_catalog.pg_type a
+        LEFT JOIN pg_catalog.pg_type b ON
+          b.oid = a.typelem
+        JOIN pg_catalog.pg_type c
+          ON
+          c.typarray = b.typbasetype
+          OR c.oid = b.typbasetype
+        WHERE
+          a.typcategory = 'A'
+        GROUP BY
+          b.oid,
+          b.typarray,
+          c.oid,
+          c.typarray
+        ORDER BY
+          b.oid
+        `
+			],
+			[],
+			execute
+		);
+    types.forEach(({ oid, typarray, baseoid, basetyparray }) => addArrayType(oid, typarray, baseoid, basetyparray))
   }
 
-  function addArrayType(oid, typarray) {
+  function addArrayType(oid, typarray, baseoid, basetyparray ) {
     if (!!options.parsers[typarray] && !!options.serializers[typarray]) return
-    const parser = options.parsers[oid]
+    const parser = options.parsers[oid] || options.parsers[baseoid]
     options.shared.typeArrayMap[oid] = typarray
-    options.parsers[typarray] = (xs) => arrayParser(xs, parser, typarray)
+    options.parsers[typarray] = (xs) => arrayParser(xs, parser, basetyparray ?? typarray)
     options.parsers[typarray].array = true
-    options.serializers[typarray] = (xs) => arraySerializer(xs, options.serializers[oid], options, typarray)
+    options.serializers[typarray] = (xs) => arraySerializer(xs, options.serializers[oid] || options.serializers[baseoid], options, basetyparray ?? typarray)
   }
 
   function tryNext(x, xs) {
