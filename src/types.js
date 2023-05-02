@@ -236,6 +236,7 @@ function arrayEscape(x) {
 }
 
 export const arraySerializer = function arraySerializer(xs, serializer, options, typarray) {
+  console.log('arraySerializer', xs, serializer, options, typarray)
   if (Array.isArray(xs) === false)
     return xs
 
