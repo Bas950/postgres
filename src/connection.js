@@ -726,8 +726,7 @@ function Connection(options, queues = {}, { onopen = noop, onend = noop, onclose
     needsTypes = false
     const types = await new Query([`
       SELECT
-        DISTINCT ON
-        (b.oid) b.oid, 
+        DISTINCT ON (b.oid) b.oid, 
         b.typarray,
         CASE
           WHEN b.typbasetype > 0
@@ -762,12 +761,12 @@ function Connection(options, queues = {}, { onopen = noop, onend = noop, onclose
 
   function addArrayType(oid, typarray, baseoid, basetyparray ) {
     if (!!options.parsers[typarray] && !!options.serializers[typarray]) return
-    const parser = options.parsers[oid] || options.parsers[baseoid]
+    const parser = options.parsers[baseoid || oid]
     options.shared.typeArrayMap[oid] = typarray
     options.parsers[typarray] = (xs) => arrayParser(xs, parser, basetyparray || typarray)
     options.parsers[typarray].array = true
     options.serializers[typarray] = (xs) =>
-      arraySerializer(xs, options.serializers[oid] || options.serializers[baseoid], options, basetyparray || typarray)
+      arraySerializer(xs, options.serializers[baseoid || oid], options, basetyparray || typarray)
   }
 
   function tryNext(x, xs) {
