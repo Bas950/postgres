@@ -107,6 +107,7 @@ function Postgres(a, b) {
     }
 
     function sql(strings, ...args) {
+      console.log('sql', strings, args)
       const query = strings && Array.isArray(strings.raw)
         ? new Query(strings, args, handler, cancel)
         : typeof strings === 'string' && !args.length
