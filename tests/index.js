@@ -2502,5 +2502,5 @@ t('concurrent cursors multiple connections', async() => {
 t('Insert array into custom domain array', async() => {
   await sql`create domain my_custom_array_type as text[]`
   await sql`create table test (x my_custom_array_type)`
-  await sql`insert into test ${sql({ x: [['a']] })}`
+  await sql`insert into test (x) values (${sql({ x: [['a']] })})`
 })
